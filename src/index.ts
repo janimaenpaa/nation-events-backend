@@ -1,7 +1,8 @@
-import express, { Express, Request, Response } from 'express'
+import express, { Express } from 'express'
 import dotenv from 'dotenv'
 import cors from 'cors'
 import helmet from 'helmet'
+import routes from './routes'
 
 dotenv.config()
 
@@ -12,9 +13,7 @@ app.use(cors())
 app.use(helmet())
 app.use(express.json())
 
-app.get('/', (req: Request, res: Response) => {
-  res.send('Hello World!')
-})
+app.use(routes)
 
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`)
