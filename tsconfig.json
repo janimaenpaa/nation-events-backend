@@ -2,10 +2,8 @@
   "compilerOptions": {
     "target": "ES6",
     "module": "CommonJS",
-    "baseUrl": ".",
-    "paths": {
-      "@src/*": ["src/*"]
-    },
+    "baseUrl": "src",
+    "paths": {},
     "moduleResolution": "Node",
     "outDir": "build",
     "importsNotUsedAsValues": "remove",
@@ -16,6 +14,6 @@
     "skipLibCheck": true,
     "ignoreDeprecations": "5.0"
   },
-  "exclude": ["node_modules"],
-  "include": ["src/**/*.ts", "tests/**/*.ts"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"]
 }
