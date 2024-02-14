@@ -1,7 +1,11 @@
 import { parseIcal } from '../utils/ical'
-import { nations } from '../nationsData'
+import prisma from '../../prisma/prisma-client'
 
 export const searchEvents = async () => {
+  const nations = await prisma.nation.findMany()
+
+  await prisma.event.deleteMany({})
+
   const icalEvents = await Promise.all(
     nations.map(async (nation) => {
       if (nation.icalUrl) {
@@ -40,5 +44,23 @@ export const searchEvents = async () => {
     }
   })
 
-  return combinedNationEvents
+  const createdEvents = []
+
+  for (const nation of combinedNationEvents) {
+    for (const event of nation.events) {
+      const createdEvent = await prisma.event.create({
+        data: {
+          name: event.name,
+          startTime: event.startTime,
+          endTime: event.endTime,
+          description: event.description,
+          url: event.url,
+          nationId: nation.id,
+        },
+      })
+      createdEvents.push(createdEvent)
+    }
+  }
+
+  return createdEvents
 }
