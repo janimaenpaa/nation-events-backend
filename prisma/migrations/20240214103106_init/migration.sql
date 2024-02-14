@@ -13,10 +13,11 @@ CREATE TABLE "Nation" (
 -- CreateTable
 CREATE TABLE "Event" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    "description" TEXT NOT NULL,
+    "description" TEXT,
     "name" TEXT NOT NULL,
     "endTime" TEXT NOT NULL,
     "startTime" TEXT NOT NULL,
+    "url" TEXT,
     "nationId" INTEGER NOT NULL,
     CONSTRAINT "Event_nationId_fkey" FOREIGN KEY ("nationId") REFERENCES "Nation" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
