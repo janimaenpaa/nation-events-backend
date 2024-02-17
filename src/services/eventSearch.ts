@@ -1,5 +1,6 @@
 import { parseIcal } from '../utils/ical'
 import prisma from '../../prisma/prisma-client'
+import { Event } from '@prisma/client'
 
 export const searchEvents = async () => {
   const nations = await prisma.nation.findMany()
@@ -44,7 +45,7 @@ export const searchEvents = async () => {
     }
   })
 
-  const createdEvents = []
+  const createdEvents: Event[] = []
 
   for (const nation of combinedNationEvents) {
     for (const event of nation.events) {

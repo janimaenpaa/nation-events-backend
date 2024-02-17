@@ -13,3 +13,12 @@ export const getEventsByNation = async (nationId: number) => {
     })
     return events
 }
+
+export const getEventById = async (eventId: number) => {
+    const event = await prisma.event.findUnique({
+        where: {
+        id: eventId,
+        },
+    })
+    return event
+}
