@@ -1,12 +1,9 @@
-import { parseIcal } from '../utils/ical'
 import prisma from '../../prisma/prisma-client'
-import { Event } from '@prisma/client'
+import { Event, Nation } from '@prisma/client'
+import { parseIcal } from '../utils/ical'
+import { parseKide } from '../utils/kide'
 
-export const searchEvents = async () => {
-  const nations = await prisma.nation.findMany()
-
-  await prisma.event.deleteMany({})
-
+const getIcalEvents = async (nations: Nation[]) => {
   const icalEvents = await Promise.all(
     nations.map(async (nation) => {
       if (nation.icalUrl) {
@@ -18,50 +15,67 @@ export const searchEvents = async () => {
     })
   )
 
-  // TODO: Implement custom calendar scraping
-  /* const customCalendarEvents = await Promise.all(
+  return icalEvents
+}
+
+const getKideEvents = async (nations: Nation[]) => {
+  const kideEvents = await Promise.all(
     nations.map(async (nation) => {
-      if (nation.customCalendarUrl) {
-        const events = await scrapeCustomCalendar(nation.customCalendarUrl)
+      if (nation.kideUrl) {
+        const events = await parseKide(nation.kideUrl)
         return { ...nation, events }
       }
 
       return { ...nation, events: [] }
     })
-  ) */
+  )
 
-  const combinedNationEvents = nations.map((nation) => {
-    const icalEventsForNation = icalEvents.find((event) => event.abbreviation === nation.abbreviation)
-    /* const customCalendarEventsForNation = customCalendarEvents.find(
-      (event) => event.abbrevation === nation.abbrevation
-    ) */
+  return kideEvents
+}
 
-    const icalEventsForNationEvents = icalEventsForNation?.events ?? []
-    //const customCalendarEventsForNationEvents = customCalendarEventsForNation?.events ?? []
+export const searchEvents = async () => {
+  try {
+    const nations = await prisma.nation.findMany()
 
-    return {
-      ...nation,
-      events: [...icalEventsForNationEvents /*, ...customCalendarEventsForNationEvents */],
+    await prisma.event.deleteMany({})
+
+    const icalEvents = await getIcalEvents(nations)
+    const kideEvents = await getKideEvents(nations)
+
+    const combinedNationEvents = nations.map((nation) => {
+      const icalEventsForNation = icalEvents.find((event) => event.abbreviation === nation.abbreviation)
+      const kideEventsForNation = kideEvents.find((event) => event.abbreviation === nation.abbreviation)
+
+      const icalEventsForNationEvents = icalEventsForNation?.events ?? []
+      const kideEventsForNationEvents = kideEventsForNation?.events ?? []
+
+      return {
+        ...nation,
+        events: [...icalEventsForNationEvents, ...kideEventsForNationEvents],
+      }
+    })
+
+    const createdEvents: Event[] = []
+
+    for (const nation of combinedNationEvents) {
+      for (const event of nation.events) {
+        const createdEvent = await prisma.event.create({
+          data: {
+            name: event.name,
+            startTime: event.startTime,
+            endTime: event.endTime,
+            description: event.description,
+            url: event.url,
+            nationId: nation.id,
+          },
+        })
+        createdEvents.push(createdEvent)
+      }
     }
-  })
 
-  const createdEvents: Event[] = []
-
-  for (const nation of combinedNationEvents) {
-    for (const event of nation.events) {
-      const createdEvent = await prisma.event.create({
-        data: {
-          name: event.name,
-          startTime: event.startTime,
-          endTime: event.endTime,
-          description: event.description,
-          url: event.url,
-          nationId: nation.id,
-        },
-      })
-      createdEvents.push(createdEvent)
-    }
+    return createdEvents
+  } catch (error: any) {
+    console.error('An error occurred while searching for events:', error)
+    throw error
   }
-
-  return createdEvents
 }
