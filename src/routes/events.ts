@@ -1,11 +1,22 @@
 import { Router, Request, Response } from 'express'
-import { getEventById, getEvents, getEventsByNation } from '../services/events'
+import { getEventById, getEvents, getEventsByNation, getEventsThisWeek } from '../services/events'
 import { StatusCodes } from 'http-status-codes'
 
 const router = Router()
 
 router.get('/api/events', async (_req: Request, res: Response) => {
   const data = await getEvents()
+
+  if (!data) {
+    res.status(StatusCodes.NOT_FOUND).json({ error: 'No events found' })
+    return
+  }
+
+  res.json({ data })
+})
+
+router.get('/api/events/this-week', async (_req: Request, res: Response) => {
+  const data = await getEventsThisWeek()
 
   if (!data) {
     res.status(StatusCodes.NOT_FOUND).json({ error: 'No events found' })

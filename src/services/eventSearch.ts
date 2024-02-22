@@ -62,8 +62,8 @@ export const searchEvents = async () => {
         const createdEvent = await prisma.event.create({
           data: {
             name: event.name,
-            startTime: event.startTime,
-            endTime: event.endTime,
+            startTime: new Date(event.startTime),
+            endTime: new Date(event.endTime),
             description: event.description,
             url: event.url,
             nationId: nation.id,
