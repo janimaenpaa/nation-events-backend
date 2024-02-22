@@ -24,8 +24,8 @@ model Event {
   id          Int    @id @default(autoincrement())
   description String?
   name        String
-  endTime     String
-  startTime   String
+  endTime     DateTime
+  startTime   DateTime
   url         String?
   nationId    Int
   nation      Nation @relation(fields: [nationId], references: [id])
