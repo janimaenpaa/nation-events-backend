@@ -6,14 +6,14 @@ export enum ResponseStatus {
 }
 
 export class ServiceResponse<T = null> {
+  data: T
   message: string
-  responseObject: T
   statusCode: number
   success: boolean
 
-  constructor(status: ResponseStatus, message: string, responseObject: T, statusCode: number) {
+  constructor(status: ResponseStatus, message: string, data: T, statusCode: number) {
+    this.data = data
     this.message = message
-    this.responseObject = responseObject
     this.statusCode = statusCode
     this.success = status === ResponseStatus.Success
   }
@@ -21,8 +21,8 @@ export class ServiceResponse<T = null> {
 
 export const ServiceResponseSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
   z.object({
+    data: dataSchema.optional(),
     message: z.string(),
-    responseObject: dataSchema.optional(),
     statusCode: z.number(),
     success: z.boolean(),
   })

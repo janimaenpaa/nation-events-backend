@@ -1,53 +1,29 @@
 import { Router, Request, Response } from 'express'
 import { getEventById, getEvents, getEventsByNation, getEventsThisWeek } from '../services/events'
-import { StatusCodes } from 'http-status-codes'
+import { handleServiceResponse } from '../utils/httpHandlers'
 
 const router = Router()
 
 router.get('/api/events', async (_req: Request, res: Response) => {
-  const data = await getEvents()
-
-  if (!data) {
-    res.status(StatusCodes.NOT_FOUND).json({ error: 'No events found' })
-    return
-  }
-
-  res.json({ data })
+  const serviceResponse = await getEvents()
+  handleServiceResponse(serviceResponse, res)
 })
 
 router.get('/api/events/this-week', async (_req: Request, res: Response) => {
-  const data = await getEventsThisWeek()
-
-  if (!data) {
-    res.status(StatusCodes.NOT_FOUND).json({ error: 'No events found' })
-    return
-  }
-
-  res.json({ data })
+  const serviceResponse = await getEventsThisWeek()
+  handleServiceResponse(serviceResponse, res)
 })
 
 router.get('/api/events/:eventId', async (req: Request, res: Response) => {
   const eventId = Number(req.params.eventId)
-  const data = await getEventById(eventId)
-
-  if (!data) {
-    res.status(StatusCodes.NOT_FOUND).json({ error: 'Event not found' })
-    return
-  }
-
-  res.json({ data })
+  const serviceResponse = await getEventById(eventId)
+  handleServiceResponse(serviceResponse, res)
 })
 
 router.get('/api/events/nation/:nationId', async (req: Request, res: Response) => {
   const nationId = Number(req.params.nationId)
-  const data = await getEventsByNation(nationId)
-
-  if (!data) {
-    res.status(StatusCodes.NOT_FOUND).json({ error: 'No events found' })
-    return
-  }
-
-  res.json({ data })
+  const serviceResponse = await getEventsByNation(nationId)
+  handleServiceResponse(serviceResponse, res)
 })
 
 export default router
